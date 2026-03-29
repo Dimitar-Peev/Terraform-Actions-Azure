@@ -3,7 +3,7 @@ variable "subscription_id" {
   description = "Azure Subscription ID"
 }
 
-variable "sp_name" {
+variable "client_id" {
   type        = string
-  description = "Display name for the Service Principal"
+  description = "Client ID на съществуващия Service Principal"
 }
