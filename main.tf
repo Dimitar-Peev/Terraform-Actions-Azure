@@ -9,31 +9,32 @@ terraform {
       version = "3.8.1"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "terraform-state-rg"
+    storage_account_name = "tfstate10494"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
-  # Configuration options
   features {
 
   }
-  # Microsoft Azure -> Home -> Subscriptions -> Subscription ID
   subscription_id = var.subscription_id
 }
 
-# Генерира случайно число за уникални имена на ресурси
 resource "random_integer" "ri" {
   min = 10000
   max = 99999
 }
 
-# Resource Group
 resource "azurerm_resource_group" "rg" {
-  # name     = "taskboard-rg-${random_integer.ri.result}"
   name     = "${var.resource_group_name}-${random_integer.ri.result}"
   location = var.resource_group_location
 }
 
-# App Service Plan (Linux, Free tier F1)
 resource "azurerm_service_plan" "asp" {
   name                = "taskboard-asp-${random_integer.ri.result}"
   location            = azurerm_resource_group.rg.location
@@ -42,7 +43,6 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "F1"
 }
 
-# MSSQL Server
 resource "azurerm_mssql_server" "sql" {
   name                         = "taskboard-sql-${random_integer.ri.result}"
   resource_group_name          = azurerm_resource_group.rg.name
@@ -52,7 +52,6 @@ resource "azurerm_mssql_server" "sql" {
   administrator_login_password = var.sql_admin_password
 }
 
-# MSSQL Database
 resource "azurerm_mssql_database" "db" {
   name                 = var.sql_database_name
   server_id            = azurerm_mssql_server.sql.id
@@ -63,13 +62,11 @@ resource "azurerm_mssql_database" "db" {
   max_size_gb          = 2
   storage_account_type = "Local"
 
-  # prevent_destroy защита от случайно изтриване на базата данни
   lifecycle {
     prevent_destroy = true
   }
 }
 
-# Firewall rule — разрешава достъп от Azure ресурси
 resource "azurerm_mssql_firewall_rule" "fw" {
   name             = var.firewall_rule_name
   server_id        = azurerm_mssql_server.sql.id
@@ -77,7 +74,6 @@ resource "azurerm_mssql_firewall_rule" "fw" {
   end_ip_address   = "0.0.0.0"
 }
 
-# Linux Web App
 resource "azurerm_linux_web_app" "app" {
   name                = "taskboard-app-${random_integer.ri.result}"
   location            = azurerm_resource_group.rg.location
@@ -98,7 +94,6 @@ resource "azurerm_linux_web_app" "app" {
   }
 }
 
-# Deploy от GitHub
 resource "azurerm_app_service_source_control" "sc" {
   app_id                 = azurerm_linux_web_app.app.id
   repo_url               = var.github_repo_url
