@@ -1,0 +1,5 @@
+subscription_id      = "8a970b89-6815-472e-91f8-4d7a25f01b18"
+resource_group_name  = "terraform-state-rg"
+location             = "Spain Central"
+storage_account_name = "tfstate10494"
+container_name       = "tfstate"
