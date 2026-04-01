@@ -10,7 +10,7 @@ env:
   ARM_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
 
   TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  
+
 jobs:
   provision-backend:
     name: 'Provision Backend Storage'
@@ -33,6 +33,13 @@ jobs:
       - name: Terraform Init
         working-directory: terraform-backend
         run: terraform init
+
+      - name: Terraform Import Existing Resources
+        working-directory: terraform-backend
+        run: |
+          terraform import azurerm_resource_group.rg /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-state-rg || true
+          terraform import azurerm_storage_account.sa /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-state-rg/providers/Microsoft.Storage/storageAccounts/tfstate10494 || true
+          terraform import azurerm_storage_container.sc https://tfstate10494.blob.core.windows.net/tfstate || true
 
       - name: Terraform Plan
         working-directory: terraform-backend
