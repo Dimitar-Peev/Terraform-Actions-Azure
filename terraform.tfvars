@@ -1,8 +1,5 @@
 resource_group_name     = "taskboard-rg"
 resource_group_location = "Spain Central"
-subscription_id         = "your-subscription-id"
-sql_admin_login         = "your-admin-login"
-sql_admin_password      = "your-secure-password"
 sql_database_name       = "taskboard-db"
 firewall_rule_name      = "AllowAzureServices"
 dotnet_version          = "8.0"

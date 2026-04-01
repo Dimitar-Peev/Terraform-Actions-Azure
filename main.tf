@@ -22,7 +22,6 @@ provider "azurerm" {
   features {
 
   }
-  subscription_id = var.subscription_id
 }
 
 resource "random_integer" "ri" {
@@ -62,9 +61,9 @@ resource "azurerm_mssql_database" "db" {
   max_size_gb          = 2
   storage_account_type = "Local"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "azurerm_mssql_firewall_rule" "fw" {
