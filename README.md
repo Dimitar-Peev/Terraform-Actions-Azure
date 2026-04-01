@@ -1,51 +1,46 @@
 # TaskBoard Azure Infrastructure with Terraform
 
-Това хранилище съдържа Terraform конфигурация за автоматизирано разгръщане на **TaskBoard** приложението в Azure, включително инфраструктура за съхранение на състоянието (Backend) и управление на достъпа (Service Principal).
+Това хранилище съдържа цялостна **Infrastructure as Code (IaC)** конфигурация за разгръщане на приложението **TaskBoard** в Microsoft Azure. Проектът демонстрира напреднали умения за работа с Terraform, GitHub Actions и автоматизация на облачна инфраструктура.
 
 ## 🚀 Структура на проекта
 
-Проектът е разделен на три логически модула, всеки със собствен Workflow в GitHub Actions:
+Проектът е организиран в три модула за постигане на максимална модулност и сигурност:
 
-1.  **`terraform-backend/`**: Инициализира Azure Storage Account и Container за отдалечено съхранение на `.tfstate` файловете.
-2.  **`terraform-sp/`**: Извлича и потвърждава информация за използваната идентичност (Service Principal) и абонамент.
-3.  **Root Directory (`main.tf`)**: Основната инфраструктура — App Service, SQL Server, Database и Networking.
+1.  **`terraform-backend/`**: Автоматизирано създаване на Azure Storage Account и Container за съхранение на състоянието (State).
+2.  **`terraform-sp/`**: Модул за извличане и валидация на данни за използвания Service Principal и Azure абонамент.
+3.  **Root Directory (`main.tf`)**: Основна инфраструктура, включваща Azure App Service, SQL Server, Azure SQL Database и мрежови настройки.
 
 ---
 
 ## 🛠️ GitHub Actions Workflows
 
-Всички работни процеси са напълно автоматизирани и използват **GitHub Secrets** за сигурност.
+Проектът използва три отделни пайплайна за управление на жизнения цикъл на ресурсите:
 
-* **Provision Terraform Backend**: Създава ресурсите, необходими за Terraform Backend.
-* **Provision Service Principal**: Потвърждава достъпа и извлича метаданни за текущия SP.
-* **Terraform Plan Apply**: Основният пайплайн, който разгръща уеб приложението и базата данни.
-
----
-
-## 🔐 Управление на тайни (Secrets)
-
-За успешното изпълнение на Action-ите са конфигурирани следните секрети в GitHub:
-* `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET` / `AZURE_TENANT_ID`
-* `AZURE_SUBSCRIPTION_ID`
-* `SQL_ADMIN_LOGIN` / `SQL_ADMIN_PASSWORD`
+* **Provision Terraform Backend**: Инициализира ресурсите за съхранение на стейта.
+* **Provision Service Principal**: Проверява правата за достъп и метаданните на обкръжението.
+* **Terraform Plan Apply**: Основен работен процес за разгръщане на приложението и базата данни.
 
 ---
 
-## 📝 Бележки относно предизвикателствата (Challenges)
+## 🔐 Сигурност и секрети (Secrets)
 
-### 1. Автоматизация на Backend
-Вместо ръчно създаване през CLI, беше създаден модулът `terraform-backend`. Използвана е процедура по **Terraform Import**, за да се поеме управлението над вече съществуващи ресурси в учебната среда на SoftUni.
-
-### 2. Автоматизация на Service Principal
-Конфигурацията за създаване на нов Service Principal е разработена и тествана. Поради специфични ограничения в правата на Azure Tenant-а (липса на **Admin Consent** за Microsoft Graph API в студентски акаунти), модулът е оставен във вариант, който извлича информация (`data sources`), вместо да създава нови обекти в Entra ID. 
-
-> *Забележка: Пълният код за генериране на нов SP е наличен в историята на комитите и изисква роля "Application Administrator" за успешно изпълнение.*
+Всички чувствителни данни са защитени чрез **GitHub Secrets**. Валидирани са следните променливи:
+* `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+* `SQL_ADMIN_LOGIN`, `SQL_ADMIN_PASSWORD`
 
 ---
 
-## 🏗️ Как се използва?
-1. Клонирайте хранилището.
-2. Настройте GitHub Secrets.
-3. Стартирайте Workflows в следната последователност: `Backend` -> `Service Principal` -> `Main Plan Apply`.
+## 📝 Постигнати предизвикателства (Challenges)
+
+### 1. Декларативна автоматизация на Backend
+За разлика от стандартното използване на императивни Azure CLI команди, в този проект е използван **декларативен подход чрез Terraform** за създаване на Backend ресурсите. Това осигурява пълна проследимост и управление на състоянието (State Management) на цялата инфраструктура от самото начало. За целта беше успешно приложена процедурата **Terraform Import** за поемане на контрол над съществуващи ресурси.
+
+### 2. Управление на Service Principal (SP)
+Беше разработена конфигурация за автоматизирано генериране на нов Service Principal с роля `Contributor`. Поради административни ограничения в правата на учебния Azure Tenant (липса на *Admin Consent* за Microsoft Graph API), модулът е финализиран във вариант "Read-only" (Data Sources), за да гарантира стабилност на пайплайните в текущата среда.
 
 ---
+
+## 🏗️ Инструкции за употреба
+1. Клонирайте хранилището локално.
+2. Конфигурирайте необходимите **GitHub Secrets** в настройките на репозитория.
+3. Изпълнете Workflows в последователност: **Backend** -> **Service Principal** -> **Main Plan Apply**.
