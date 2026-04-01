@@ -48,18 +48,3 @@ variable "github_branch" {
   type        = string
   description = "Branch to deploy from"
 }
-
-# variable "app_service_plan_name" {
-#   type        = string
-#   description = "Name of the App Service Plan"
-# }
-
-# variable "app_service_name" {
-#   type        = string
-#   description = "Name of the Linux Web App"
-# }
-
-# variable "sql_server_name" {
-#   type        = string
-#   description = "Name of the MSSQL Server"
-# }
