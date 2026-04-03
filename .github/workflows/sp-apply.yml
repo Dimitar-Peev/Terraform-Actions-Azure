@@ -1,6 +1,10 @@
 name: 'Provision Service Principal'
 
 on:
+  workflow_run:
+    workflows: ["Provision Terraform Backend"]
+    types:
+      - completed
   workflow_dispatch:
 
 env:
@@ -15,6 +19,7 @@ env:
 jobs:
   provision-sp:
     name: 'Provision Service Principal'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
